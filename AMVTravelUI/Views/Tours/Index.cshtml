@@ -1,0 +1,73 @@
+﻿@model List<AMVTravelUI.Models.TourViewModel>
+
+@{
+    ViewData["Title"] = "Tours Disponibles";
+}
+
+<h2>Tours Disponibles</h2>
+
+<div id="reservation-success" class="alert alert-success" style="display:none;"></div>
+<div id="reservation-error" class="alert alert-danger" style="display:none;"></div>
+
+<a asp-action="Create" class="btn btn-success mb-3">Crear Nuevo Tour</a>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Destino</th>
+                <th>Fecha de Inicio</th>
+                <th>Fecha de Fin</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tour in Model)
+            {
+                <tr>
+                    <td>@tour.Nombre</td>
+                    <td>@tour.Destino</td>
+                    <td>@tour.FechaInicio.ToShortDateString()</td>
+                    <td>@tour.FechaFin.ToShortDateString()</td>
+                    <td>@tour.Precio.ToString("C")</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm reserve-tour" data-tour-id="@tour.Id">Reservar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No hay tours disponibles.</p>
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.reserve-tour').on('click', function () {
+                var tourId = $(this).data('tour-id');
+
+                $.ajax({
+                    url: '@Url.Action("Reserve", "Tours")',
+                    type: 'POST',
+                    data: JSON.stringify({ id: tourId, cliente: cliente }),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (response) {
+                        $('#reservation-success').text('¡Reserva realizada exitosamente!').show();
+                        $('#reservation-error').hide();
+                    },
+                    error: function (xhr, status, error) {
+                        $('#reservation-error').text('Error al reservar el tour.').show();
+                        $('#reservation-success').hide();
+                    }
+                });
+            });
+        });
+    </script>
+}
